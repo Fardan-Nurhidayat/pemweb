@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('pendaftaran', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Kursus::class , 'kursus_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignIdFor(User::class, 'instruktur_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignIdFor(User::class, 'peserta_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->string('status');
             $table->timestamps();
         });

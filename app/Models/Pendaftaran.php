@@ -16,11 +16,11 @@ class Pendaftaran extends Model
         'status',
     ];
 
-    protected function kursus():BelongsTo {
+    public function kursus():BelongsTo {
         return $this->belongsTo(Kursus::class , 'kursus_id' , 'id');
     }
 
-    protected function user():BelongsTo {
+    public function user():BelongsTo {
         return $this->belongsTo(User::class , 'peserta_id' , 'id');
     }
 }

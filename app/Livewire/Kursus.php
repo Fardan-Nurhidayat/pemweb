@@ -104,6 +104,12 @@ class Kursus extends Component
         $this->resetForm();
     }
 
+    public function viewDetail($id)
+    {
+        // Contoh: redirect ke halaman detail kursus
+        return redirect()->route('kursus.detail', $id);
+    }
+
     public function delete($id)
     {
         KursusModel::destroy($id);
