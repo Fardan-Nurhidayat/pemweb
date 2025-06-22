@@ -15,10 +15,9 @@ return new class extends Migration
         Schema::create('kursus', function (Blueprint $table) {
             $table->id();
             $table->string('nama_kursus');
-            $table->string('durasi');
-            $table->foreignIdFor(User::class , 'instruktur_id' , 'id')->constrained()->onUpdate('cascade')->onDelete('cascade');
+            $table->integer('durasi');
+            $table->foreignIdFor(User::class, 'instruktur_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->integer('biaya');
-            $table->timestamp('deleted_at');
             $table->timestamps();
         });
     }

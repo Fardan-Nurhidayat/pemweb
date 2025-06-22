@@ -18,7 +18,7 @@
     <div class="mb-6">
         <div class="max-w-md">
             <x-input
-                icon="search"
+                icon="magnifying-glass"
                 placeholder="Cari kursus atau instruktur..."
                 wire:model.live.debounce.300ms="search" />
         </div>

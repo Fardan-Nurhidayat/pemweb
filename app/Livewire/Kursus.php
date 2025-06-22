@@ -7,9 +7,12 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
+use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Log; // Tambahkan ini di bagian atas
+use Exception; // Opsional, tapi disarankan untuk diimpor
 class Kursus extends Component
 {
-    use WithPagination , WireUiActions;
+    use WithPagination,WireUiActions;
 
     // Properties untuk form
     public $nama_kursus = '';
@@ -70,7 +73,7 @@ class Kursus extends Component
     }
 
     public function store()
-    {
+    {   
         $this->validate();
 
         try {
@@ -89,6 +92,9 @@ class Kursus extends Component
             $this->closeModal();
             $this->resetPage();
         } catch (\Exception $e) {
+            // Log error ke storage/logs/laravel.log
+            Log::error('Error saat menyimpan kursus: ' . $e->getMessage());
+
             $this->notification()->error(
                 $title = 'Error!',
                 $description = 'Terjadi kesalahan saat menyimpan data.'
@@ -112,8 +118,6 @@ class Kursus extends Component
 
     public function update()
     {
-        $this->validate();
-
         try {
             $kursus = KursusModel::findOrFail($this->kursusId);
             $kursus->update([
@@ -130,9 +134,11 @@ class Kursus extends Component
 
             $this->closeModal();
         } catch (\Exception $e) {
+            Log::error('Error saat menyimpan kursus: ' . $e->getMessage());
+
             $this->notification()->error(
                 $title = 'Error!',
-                $description = 'Terjadi kesalahan saat memperbarui data.'
+                $description = 'Terjadi kesalahan saat menyimpan data.'
             );
         }
     }
@@ -165,6 +171,7 @@ class Kursus extends Component
         }
     }
 
+    #[Layout('layouts.app')]
     public function render()
     {
         $kursus = KursusModel::with('user')
@@ -176,7 +183,6 @@ class Kursus extends Component
             })
             ->latest()
             ->paginate(9);
-
         $instruktur = User::select('id', 'name')->get();
 
         return view('livewire.kursus', compact('kursus', 'instruktur'));

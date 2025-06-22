@@ -7,12 +7,12 @@ use App\Models\Materi;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Kursus extends Model
 {
-    use SoftDeletes;
+    use HasFactory;
+
     protected $table = "kursus";
     protected $fillable = [
         'nama_kursus', 
@@ -24,7 +24,7 @@ class Kursus extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'instruktur_id');
+        return $this->belongsTo(User::class, 'instruktur_id' , 'id');
     }
 
     protected function materi() : HasMany {
