@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\InstrukturController;
+use Laravel\Fortify\Actions\AttemptToAuthenticate;
+use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Support\Facades\Auth;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
@@ -21,7 +26,17 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->when([AdminController::class, AttemptToAuthenticate::class, RedirectIfTwoFactorAuthenticatable::class])
+            ->needs(StatefulGuard::class)
+            ->give(function () {
+                return Auth::guard('admin');
+            });
+        
+        $this->app->when([InstrukturController::class, AttemptToAuthenticate::class, RedirectIfTwoFactorAuthenticatable::class])
+            ->needs(StatefulGuard::class)
+            ->give(function () {
+                return Auth::guard('instruktur');
+            });
     }
 
     /**
