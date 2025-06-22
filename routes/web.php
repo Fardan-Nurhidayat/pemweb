@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\User;
 use App\Livewire\Kursus;
 use App\Livewire\Materi;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,7 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 
-    Route::get('/materi' , Materi::class)->name('get-materi');
-    Route::get('/kursus' , Kursus::class)->name('get-kursus');
+    Route::get('/materi' , Materi::class)->name('materi.index');
+    Route::get('/kursus' , Kursus::class)->name('kursus.index');
+    Route::get('/users', User::class)->name('users.index');
 });

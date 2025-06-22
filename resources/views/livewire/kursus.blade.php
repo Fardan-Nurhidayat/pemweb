@@ -1,183 +1,215 @@
-<div class="p-6">
-    {{-- Header Section --}}
-    <div class="mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Management Kursus</h1>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Kelola data kursus yang tersedia</p>
-            </div>
-            <div class="mt-4 sm:mt-0">
-                <x-button primary icon="plus" wire:click="openModal">
-                    Tambah Kursus
-                </x-button>
-            </div>
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Manajemen Kursus</h1>
+            <p class="text-gray-600">Kelola kursus dan instruktur dengan mudah</p>
         </div>
-    </div>
 
-    {{-- Search Section --}}
-    <div class="mb-6">
-        <div class="max-w-md">
-            <x-input
-                icon="magnifying-glass"
-                placeholder="Cari kursus atau instruktur..."
-                wire:model.live.debounce.300ms="search" />
+        <!-- Flash Message -->
+        @if (session()->has('message'))
+            <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+                <svg class="w-5 h-5 text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-green-800 font-medium">{{ session('message') }}</span>
+            </div>
+        @endif
+
+        <!-- Add Course Button -->
+        <div class="mb-8">
+            <button 
+                wire:click="toggleForm" 
+                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
+            >
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                {{ $showForm ? 'Tutup Form' : 'Tambah Kursus Baru' }}
+            </button>
         </div>
-    </div>
 
-    {{-- Cards Grid --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        @forelse($kursus as $item)
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
-            <div class="p-6">
-                {{-- Header Card --}}
-                <div class="flex items-start justify-between mb-4">
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
-                            {{ $item->nama_kursus }}
-                        </h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                            <x-icon name="user" class="w-4 h-4 mr-1" />
-                            {{ $item->user->name ?? 'Instruktur tidak ditemukan' }}
-                        </p>
-                    </div>
-                    <div class="flex space-x-1 ml-2">
-                        <x-button
-                            xs
-                            outline
-                            positive
-                            icon="pencil"
-                            wire:click="edit({{ $item->id }})"
-                            title="Edit Kursus" />
-                        <x-button
-                            xs
-                            outline
-                            negative
-                            icon="trash"
-                            wire:click="delete({{ $item->id }})"
-                            title="Hapus Kursus" />
-                    </div>
+        <!-- Form -->
+        @if($showForm)
+            <div class="mb-8 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                    <h2 class="text-xl font-semibold text-white">
+                        {{ $isEdit ? 'Edit Kursus' : 'Tambah Kursus Baru' }}
+                    </h2>
                 </div>
-
-                {{-- Content Card --}}
-                <div class="space-y-3">
-                    {{-- Durasi --}}
-                    <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <x-icon name="clock" class="w-4 h-4 mr-2 text-blue-500" />
-                        <span>{{ $item->durasi }} hari</span>
-                    </div>
-
-                    {{-- Biaya --}}
-                    <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <x-icon name="currency-dollar" class="w-4 h-4 mr-2 text-green-500" />
-                        <span class="font-medium text-green-600 dark:text-green-400">
-                            Rp {{ number_format($item->biaya, 0, ',', '.') }}
-                        </span>
-                    </div>
-
-                    {{-- Tanggal dibuat --}}
-                    <div class="flex items-center text-xs text-gray-500 dark:text-gray-500">
-                        <x-icon name="calendar" class="w-3 h-3 mr-1" />
-                        <span>Dibuat: {{ $item->created_at->format('d M Y') }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @empty
-        <div class="col-span-full">
-            <div class="text-center py-12">
-                <x-icon name="academic-cap" class="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    Belum ada kursus
-                </h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">
-                    @if($search)
-                    Tidak ada kursus yang ditemukan dengan kata kunci "{{ $search }}"
-                    @else
-                    Mulai dengan menambahkan kursus pertama Anda
-                    @endif
-                </p>
-                @if($search)
-                <x-button outline wire:click="$set('search', '')">
-                    Hapus Filter
-                </x-button>
-                @else
-                <x-button primary icon="plus" wire:click="openModal">
-                    Tambah Kursus
-                </x-button>
-                @endif
-            </div>
-        </div>
-        @endforelse
-    </div>
-
-    {{-- Pagination --}}
-    @if($kursus->hasPages())
-    <div class="mt-6">
-        {{ $kursus->links() }}
-    </div>
-    @endif
-
-    {{-- Modal Form --}}
-    <x-modal wire:model.defer="isOpen" max-width="lg">
-        <x-card title="{{ $isEdit ? 'Edit Kursus' : 'Tambah Kursus' }}">
-            <form wire:submit.prevent="{{ $isEdit ? 'update' : 'store' }}">
-                <div class="space-y-4">
-                    {{-- Nama Kursus --}}
-                    <div>
-                        <x-input
-                            label="Nama Kursus"
-                            placeholder="Masukkan nama kursus"
-                            wire:model="nama_kursus"
-                            required />
-                    </div>
-
-                    {{-- Instruktur --}}
-                    <div>
-                        <x-select
-                            label="Instruktur"
-                            placeholder="Pilih instruktur"
-                            wire:model="instruktur_id"
-                            :options="$instruktur"
-                            option-label="name"
-                            option-value="id"
-                            required />
-                    </div>
-
-                    {{-- Durasi dan Biaya --}}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <form wire:submit.prevent="{{ $isEdit ? 'update' : 'save' }}" class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <x-input
-                                label="Durasi (hari)"
-                                placeholder="30"
-                                wire:model="durasi"
-                                type="number"
-                                min="1"
-                                required />
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Kursus</label>
+                            <input 
+                                type="text" 
+                                wire:model="nama_kursus" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                placeholder="Masukkan nama kursus"
+                            >
+                            @error('nama_kursus') 
+                                <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                            @enderror
                         </div>
+
                         <div>
-                            <x-input
-                                label="Biaya"
-                                placeholder="500000"
-                                wire:model="biaya"
-                                type="number"
-                                min="0"
-                                step="1000"
-                                required />
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi (jam)</label>
+                            <input 
+                                type="number" 
+                                wire:model="durasi" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                placeholder="Contoh: 40"
+                            >
+                            @error('durasi') 
+                                <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Instruktur</label>
+                            <select 
+                                wire:model="instruktur_id" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                            >
+                                <option value="">-- Pilih Instruktur --</option>
+                                @foreach($instrukturs as $user)
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('instruktur_id') 
+                                <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Biaya (Rupiah)</label>
+                            <input 
+                                type="number" 
+                                wire:model="biaya" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                placeholder="Contoh: 500000"
+                            >
+                            @error('biaya') 
+                                <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                            @enderror
                         </div>
                     </div>
-                </div>
 
-                <x-slot name="footer">
-                    <div class="flex justify-end space-x-2">
-                        <x-button flat label="Batal" wire:click="closeModal" />
-                        <x-button
-                            primary
-                            type="submit"
-                            :label="$isEdit ? 'Update' : 'Simpan'"
-                            spinner="{{ $isEdit ? 'update' : 'store' }}" />
+                    <div class="flex gap-4 mt-8">
+                        <button 
+                            type="submit" 
+                            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
+                        >
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            {{ $isEdit ? 'Update Kursus' : 'Simpan Kursus' }}
+                        </button>
+                        
+                        <button 
+                            type="button" 
+                            wire:click="resetForm" 
+                            class="inline-flex items-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
+                        >
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Batal
+                        </button>
                     </div>
-                </x-slot>
-            </form>
-        </x-card>
-    </x-modal>
-</div>
+                </form>
+            </div>
+        @endif
+
+        <!-- Course Cards -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Daftar Kursus</h2>
+            
+            @if($kursusList->count() > 0)
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($kursusList as $k)
+                        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                            <!-- Card Header -->
+                            <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                                <h3 class="text-xl font-bold text-white line-clamp-2">{{ $k->nama_kursus }}</h3>
+                            </div>
+                            
+                            <!-- Card Body -->
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <!-- Duration -->
+                                    <div class="flex items-center text-gray-600">
+                                        <svg class="w-5 h-5 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span class="font-semibold">{{ $k->durasi }} jam</span>
+                                    </div>
+                                    
+                                    <!-- Instructor -->
+                                    <div class="flex items-center text-gray-600">
+                                        <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        <span>{{ $k->user->name ?? 'Tidak ada instruktur' }}</span>
+                                    </div>
+                                    
+                                    <!-- Price -->
+                                    <div class="flex items-center text-gray-600">
+                                        <svg class="w-5 h-5 mr-3 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                        </svg>
+                                        <span class="font-bold text-lg text-green-600">Rp {{ number_format($k->biaya, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card Footer -->
+                            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                                <div class="flex gap-3">
+                                    <button 
+                                        wire:click="edit({{ $k->id }})" 
+                                        class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
+                                    >
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                        Edit
+                                    </button>
+                                    
+                                    <button 
+                                        wire:click="delete({{ $k->id }})" 
+                                        class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
+                                    >
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                        Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <!-- Empty State -->
+                <div class="text-center py-12">
+                    <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Belum ada kursus</h3>
+                    <p class="text-gray-600 mb-6">Mulai dengan menambahkan kursus pertama Anda</p>
+                    <button 
+                        wire:click="toggleForm" 
+                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
+                    >
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Tambah Kursus Pertama
+                    </button>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>  

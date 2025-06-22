@@ -21,7 +21,6 @@
     <!-- Styles -->
     @livewireStyles
 
-    <wireui:scripts />
 </head>
 
 <body>
